@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do List Creator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;700&family=Prompt:wght@300;400;500;700&family=Michroma&family=Inconsolata&display=swap">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        padding: 20px;
+        background-color: #003366; 
+        color: white; 
+    }
+    h2 {
+        font-family: 'Michroma', sans-serif;
+        font-size: 28px;
+    }
+    .form-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px; 
+    }
+    input[type="text"], input[type="date"] {
+        flex: 1;
+        padding: 10px;
+        margin-right: 10px;
+        background-color: black; 
+        color: white; 
+        border: 1px solid white; 
+        font-family: 'Comfortaa', cursive; 
+        font-size: 16px; 
+        border-radius: 5px; 
+    }
+    button, .delete-btn {
+        padding: 10px 20px;
+        background-color: #009999; 
+        color: white; 
+        border: 1px solid white; 
+        cursor: pointer;
+        margin-right: 10px;
+        font-family: 'Prompt', sans-serif; 
+        font-weight: 500; 
+        border-radius: 5px; 
+    }
+    button:hover, .delete-btn:hover {
+        background-color: #007a7a; 
+    }
+    .todo-item {
+        padding: 10px;
+        background-color: black;
+        border: 1px solid white;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .todo-item-content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        padding: 10px; 
+    }
+    .todo-item-text {
+        margin-right: 10px;
+        font-family: 'Michroma', sans-serif; 
+        font-weight: 400; 
+        font-size: 18px; 
+        color: white; 
+    }
+    .todo-item-date {
+        font-family: 'Inconsolata', monospace; 
+        font-size: 0.8em;
+        color: #FFFF99; 
+    }
+    .todo-item-checkbox {
+        margin-right: 10px;
+    }
+    .delete-btn {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-family: 'Prompt', sans-serif; 
+        font-weight: 500;
+        border-radius: 5px; 
+    }
+    .delete-btn:hover {
+        background-color: #da190b;
+    }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <h2>To-Do List Creator</h2>
+    <form id="todoForm">
+        <div class="form-row">
+            <input type="text" id="todoInput" placeholder="Add new task...">
+            <input type="date" id="dueDate">
+            <button type="submit" id="addBtn">Add</button>
+            <button type="button" id="saveBtn">Save</button> 
+        </div>
+    </form>
+    <ul id="todoList"></ul>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('todoForm');
+            const input = document.getElementById('todoInput');
+            const dueDate = document.getElementById('dueDate');
+            const list = document.getElementById('todoList');
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const todoText = input.value.trim();
+                const dateValue = dueDate.value;
+
+                if (todoText !== '') {
+                    addTodoItem(todoText, dateValue);
+                    input.value = '';
+                    dueDate.value = '';
+                }
+            });
+            document.getElementById('saveBtn').addEventListener('click', function() { 
+                const listContainer = document.getElementById('todoList');
+                html2pdf(listContainer, {
+                    margin: 10,
+                    filename: 'todo_list.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { dpi: 192, letterRendering: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                });
+            });
+            function addTodoItem(todoText, dateValue) {
+                const todoItem = document.createElement('li');
+                todoItem.className = 'todo-item';
+                const todoItemContent = document.createElement('div');
+                todoItemContent.className = 'todo-item-content';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'todo-item-checkbox';
+                checkbox.addEventListener('change', function() {
+                    todoTextElem.style.textDecoration = checkbox.checked ? 'line-through' : 'none';
+                    todoDateElem.style.textDecoration = checkbox.checked ? 'line-through' : 'none';
+                });
+
+                const todoTextElem = document.createElement('div');
+                todoTextElem.className = 'todo-item-text';
+                todoTextElem.textContent = todoText;
+                const todoDateElem = document.createElement('div');
+                todoDateElem.className = 'todo-item-date';
+                todoDateElem.textContent = `Due: ${dateValue}`;
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.addEventListener('click', function() {
+                    todoItem.remove();
+                });
+                todoItemContent.appendChild(checkbox);
+                todoItemContent.appendChild(todoTextElem);
+                todoItemContent.appendChild(todoDateElem);
+                todoItem.appendChild(todoItemContent);
+                todoItem.appendChild(deleteBtn);
+                list.appendChild(todoItem);
+            }
+        });
+    </script>
+</body>
+</html>
